@@ -1,0 +1,16 @@
+[mysqld]
+user = mysql
+bind-address = 0.0.0.0
+skip-name-resolve
+secure_file_priv = ""
+character-set-server = utf8mb4
+collation-server = utf8mb4_unicode_ci
+# 存储引擎
+default-storage-engine = InnoDB
+
+# InnoDB 优化
+innodb_buffer_pool_size = 512M
+innodb_log_file_size = 256M
+innodb_flush_log_at_trx_commit = 1
+innodb_lock_wait_timeout = 50
+
