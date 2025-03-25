@@ -28,6 +28,6 @@ default_authentication_plugin=mysql_native_password
 select user,host,plugin from mysql.user;
 
 # 修改密码认证方式
-ALTER USER ‘root’@‘localhost’ IDENTIFIED WITH mysql_native_password BY ‘your password’;
+ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'your password';
 FLUSH PRIVILEGES; #刷新权限
 ```
