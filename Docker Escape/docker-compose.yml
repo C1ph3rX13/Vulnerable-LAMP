@@ -1,0 +1,42 @@
+services:
+  # 场景一: Docker Socket 挂载逃逸
+  # 漏洞原理：容器内拥有了对宿主 Docker 守护进程的完全控制权。
+  # 利用方式：通过 docker.sock 在宿主机上启动一个新容器，并将宿主机的根目录挂载进去。
+  docker_socket:
+    # 使用当前目录下的 Dockerfile 进行构建
+    build: .
+    container_name: escape_lab_socket
+    image: docker-escape-lab:1.0
+    volumes:
+      # 将宿主机的 Docker Socket 挂载到容器内
+      - /var/run/docker.sock:/var/run/docker.sock
+    tty: true
+    stdin_open: true
+    restart: unless-stopped
+
+  # 场景二: 特权模式逃逸
+  # 漏洞原理：--privileged 参数赋予了容器几乎与宿主机相同的权限，可以访问所有设备。
+  # 利用方式：可以在容器内直接挂载宿主机磁盘，然后 chroot 切换到宿主机环境。
+  privileged_container:
+    build: .
+    container_name: escape_lab_privileged
+    image: docker-escape-lab:1.0
+    # 赋予容器特权
+    privileged: true
+    tty: true
+    stdin_open: true
+    restart: unless-stopped
+
+  # 场景三: 根目录挂载逃逸
+  # 漏洞原理：错误地将宿主机的根目录 / 挂载到了容器内的某个目录。
+  # 利用方式：直接访问挂载点，即可读写宿主机的任意文件。
+  root_mount:
+    build: .
+    container_name: escape_lab_root_mount
+    image: docker-escape-lab:1.0
+    volumes:
+      # 将宿主机的根目录 / 挂载到容器的 /host_fs 目录
+      - /:/host_fs
+    tty: true
+    stdin_open: true
+    restart: unless-stopped
