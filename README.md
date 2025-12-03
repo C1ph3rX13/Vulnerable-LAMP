@@ -174,10 +174,4 @@ chmod +x clean.sh
 
 ## 许可证
 
-本项目采用 MIT 许可证，详情请参见 [LICENSE](LICENSE) 文件。
-
----
-
-<p align="center">
-  Made with ❤️ for security researchers
-</p>
+本项目采用 MIT 许可证，详情请参见 [LICENSE](LICENSE) 文件
