@@ -4,17 +4,18 @@ ENV DEBIAN_FRONTEND=noninteractive \
     TZ=Asia/Shanghai \
     LC_ALL=C.UTF-8
 
-RUN apt update \
-    && apt install -y \
-    software-properties-common ca-certificates \
-    libncurses5 libaio1 libmecab2 libncurses5 libaio1 libmecab2 \
+RUN apt-get update \
+    && apt-get install -y \
+    wget curl vim \
+    iproute2 net-tools iputils-ping nmap \
+    software-properties-common ca-certificates lsb-release \
+    libncurses5 libnuma1 libaio1 libmecab2 libncurses5 libaio1 libmecab2 \
     perl-modules-5.34 libdbd-mysql-perl libdbi-perl libdevel-checklib-perl \
-    supervisor openssh-server wget apt-utils apparmor
-
-# 安装PHP5.6和相关扩展
-RUN LC_ALL=C.UTF-8 add-apt-repository -y ppa:ondrej/php \
-    && apt update \
-    && apt install -y \
+    supervisor openssh-server apt-utils apparmor \
+    # 安装 PHP 5.6
+    && LC_ALL=C.UTF-8 add-apt-repository -y ppa:ondrej/php \
+    && apt-get update \
+    && apt-get install -y \
     php5.6 \
     php5.6-fpm \
     php5.6-common \
@@ -34,20 +35,20 @@ RUN LC_ALL=C.UTF-8 add-apt-repository -y ppa:ondrej/php \
 
 COPY mysql.cnf /tmp
 COPY init.sql /tmp
-RUN cd /opt \
+
+RUN cd /tmp \
     && wget https://cdn.mysql.com/archives/mysql-5.7/mysql-server_5.7.34-1ubuntu18.04_amd64.deb-bundle.tar \
-    && tar -xvf mysql-server*.tar -C /opt \
-    && rm mysql-server_*.deb-bundle.tar \
-    && rm mysql-test*.deb && rm mysql-community-test*.deb \
-    && dpkg -i *.deb || true \
-    && apt install -f -y \
+    && tar -xf mysql-server*.tar \
+    && rm mysql-server_*.deb-bundle.tar mysql-test*.deb mysql-community-test*.deb \
+    && apt-get install -y ./mysql-common*.deb ./mysql-community-client*.deb ./mysql-client*.deb ./mysql-community-server*.deb ./mysql-server*.deb \
     && rm -rf *.deb \
-    && mv /tmp/mysql.cnf /etc/mysql/mysql.cnf \
-    && chmod 644 /etc/mysql/mysql.cnf \
-    && (mysqld_safe &) \
+    && install -m 644 /tmp/mysql.cnf /etc/mysql/mysql.conf.d/mysqld.cnf \
+    && (mysqld_safe &)\
     && sleep 5 \
     && mysql -uroot -proot -e "SOURCE /tmp/init.sql;" \
-    && rm /tmp/init.sql
+    && rm -rf /tmp/init.sql /tmp/mysql.cnf \
+    && killall mysqld \
+    && chmod -R 777 /usr/lib/mysql/plugin
 
 # 配置 Supervisor
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
@@ -60,6 +61,6 @@ RUN echo 'root:p@ss1234' | chpasswd \
     && ssh-keygen -A \
     && mkdir -p  /var/run/sshd
 
-EXPOSE 3306
+EXPOSE 80 22 3306
 
 CMD ["/usr/bin/supervisord", "-n"]
