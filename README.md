@@ -1,9 +1,9 @@
-# Vulnerable LAMP
-
-🐳 一个用于安全研究的快速部署漏洞容器环境，具有持久化数据存储功能。
+# Vulnerable LAMP 🐳
 
 [![Docker](https://img.shields.io/badge/Docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
+
+一个用于安全研究的快速部署漏洞容器环境，具有持久化数据存储功能。
 
 ## 📋 目录
 
@@ -14,16 +14,15 @@
 - [快速开始](#快速开始)
 - [使用说明](#使用说明)
 - [Docker 逃逸实验](#docker-逃逸实验)
+- [项目结构](#项目结构)
 - [常见问题](#常见问题)
 - [许可证](#许可证)
 
-## 项目简介
+## 🚀 项目简介
 
 Vulnerable LAMP 是一个专为安全研究人员设计的漏洞测试环境，它提供了一个完整的 LAMP（Linux, Apache, MySQL, PHP）堆栈，其中包含了一些常见的安全漏洞，可用于学习、测试和研究目的。
 
-该环境基于 Docker 容器技术，可以快速部署和销毁，确保不会对主机系统造成影响。
-
-## 关键特性
+## ✨ 关键特性
 
 ### 🐳 自包含的数据存储
 - MySQL 数据直接存储在容器内部
@@ -34,25 +33,27 @@ Vulnerable LAMP 是一个专为安全研究人员设计的漏洞测试环境，�
 - 包含多种常见的安全漏洞场景
 
 ### 🔧 多种实验环境
-
 - 提供不同版本的 MySQL 和 PHP 环境
 - 包含 Docker 逃逸实验场景
 
-## 支持的系统
+## 🖥️ 支持的系统
 
-- Ubuntu 20.04
-- Ubuntu 22.04
-- Ubuntu 24.04
+- **Ubuntu**: 20.04, 22.04
+- **CentOS**: 8.4
+- **Redis**: 5.0.7
 
-## 支持的软件
+## 📦 支持的软件
 
 | 组件 | 版本 |
 |------|------|
 | Apache | 2.4 |
 | MySQL | 5.x, 8.x |
-| PHP | 5.6 |
+| PHP | 5.6, 8.1 |
+| MariaDB | 10.3.28 |
+| Supervisor | 最新 |
+| SSH 服务 | 全版本 |
 
-## 快速开始
+## 🚀 快速开始
 
 ### 构建镜像
 
@@ -78,7 +79,7 @@ docker build -f PhpWebServer/5.6/Dockerfile -t lamp-env:php5.6 .
 docker run -d -p 80:80 -p 22:22 -p 3306:3306 lamp-env:php5.6
 ```
 
-## 使用说明
+## 📖 使用说明
 
 ### 访问服务
 
@@ -93,14 +94,17 @@ docker run -d -p 80:80 -p 22:22 -p 3306:3306 lamp-env:php5.6
 | 服务 | 用户名 | 密码 |
 |------|--------|------|
 | SSH | root | p@ss1234 |
+| SSH | ubuntu | ubuntu |
+| SSH | centos | centos |
 | MySQL | root | root |
 
-## Docker 逃逸实验
+## 🎯 Docker 逃逸实验
 
 项目中包含了三种常见的 Docker 逃逸实验场景：
 
 ### 1. Docker Socket 挂载逃逸
 利用原理：容器内拥有对宿主 Docker 守护进程的完全控制权。
+
 ```yaml
 volumes:
   - /var/run/docker.sock:/var/run/docker.sock
@@ -108,24 +112,60 @@ volumes:
 
 ### 2. 特权模式逃逸
 利用原理：`--privileged` 参数赋予了容器几乎与宿主机相同的权限。
+
 ```yaml
 privileged: true
 ```
 
 ### 3. 根目录挂载逃逸
 利用原理：错误地将宿主机的根目录 `/` 挂载到了容器内的某个目录。
+
 ```yaml
 volumes:
   - /:/host_fs
 ```
 
 使用 `docker-compose.yml` 文件一键启动实验环境：
+
 ```bash
 cd Docker\ Escape
 docker-compose up -d
 ```
 
-## 常见问题
+## 📁 项目结构
+
+```
+Vulnerable-LAMP/
+├── README.md
+├── LICENSE
+├── clean.sh
+├── CentOS/
+│   ├── Dockerfile
+│   └── supervisord.conf
+├── Docker Escape/
+│   ├── docker-compose.yml
+│   └── Dockerfile
+├── MySQL/
+│   ├── 5.x/
+│   │   ├── Dockerfile
+│   │   ├── init.sql
+│   │   └── mysql.cnf
+├── PhpWebServer/
+│   ├── 5.6/
+│   │   ├── Dockerfile
+│   │   ├── init.sql
+│   │   └── supervisord.conf
+├── Ubuntu/
+│   ├── 22.04/
+│   │   ├── Dockerfile
+│   │   ├── supervisord.conf
+│   │   └── banner.txt
+└── Redis/
+    ├── Dockerfile
+    └── supervisord.conf
+```
+
+## ❓ 常见问题
 
 ### MySQL 8.x 使用 mysql_native_password
 
@@ -157,7 +197,7 @@ ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'your pas
 FLUSH PRIVILEGES; #刷新权限
 ```
 
-## 清理工具
+## 🧹 清理工具
 
 项目提供了 `clean.sh` 脚本用于清理 Docker 资源：
 
@@ -172,6 +212,10 @@ chmod +x clean.sh
 - 全部清理（危险！）
 - 清理构建器缓存
 
-## 许可证
+## 📄 许可证
 
 本项目采用 MIT 许可证，详情请参见 [LICENSE](LICENSE) 文件
+
+---
+
+**⚠️ 安全提醒**: 本项目仅用于学习和研究目的，请勿在生产环境中使用。在使用过程中请遵守当地法律法规。
